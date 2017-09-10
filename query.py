@@ -28,6 +28,7 @@ def get_popular_articles():
       SELECT path, COUNT(path) AS views
       FROM log
       WHERE path LIKE '%article%'
+      AND status NOT LIKE '404%'
       GROUP BY path
       ORDER BY views DESC
       LIMIT 3) AS viewcount
@@ -57,9 +58,10 @@ def get_all_article_count():
 def get_error_requests():
     """getting the error percent for any day where the error was above 1%"""
     query = """
-    SELECT to_char(allTraffic.date, 'DD Mon YYYY'), to_char(allTraffic.percent, '99D99')
+    SELECT to_char(allTraffic.date, 'FMMonth FMDD YYYY'), to_char(allTraffic.percent, '99D99')
     FROM(
-        SELECT logErrors.eDate AS date, ((CAST(logErrors.eCount AS REAL) / CAST(logTotal.tCount AS REAL)) * 100.0) AS percent
+        SELECT logErrors.eDate AS date, ((CAST(logErrors.eCount AS REAL) / CAST(logTotal.tCount AS REAL)) * 100.0) 
+        AS percent
         FROM(
           SELECT DATE("log".time) AS eDate, COUNT("log".time) AS eCount
           FROM "log"
@@ -74,9 +76,10 @@ def get_error_requests():
     """
     return _query_news(query)
 
-#_____________________________________________
+
+# _____________________________________________
 # Unused method. Used for testing.
-#_____________________________________________
+# _____________________________________________
 def get_article(slug):
     query = """
     SELECT title
